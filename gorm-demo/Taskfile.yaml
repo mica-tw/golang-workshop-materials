@@ -1,0 +1,42 @@
+version: '3'
+
+vars:
+  EXE_NAME: gorm-demo
+  OUT_DIR: dist
+  EXE: "{{.OUT_DIR}}/{{.EXE_NAME}}"
+
+tasks:
+  build:
+    desc: Build the binary executable
+    cmds:
+      - go build -o "{{.EXE}}"
+
+  migrate:
+    desc: Run the migration scripts
+    cmds:
+      - go run main.go --config config/config-local.yml migrate {{.CLI_ARGS}}
+
+  seed:
+    desc: Seed database with fake data
+    cmds:
+      - go run main.go --config config/config-local.yml seed {{.CLI_ARGS}}
+
+  list:
+    desc: List all records from the database
+    cmds:
+      - go run main.go --config config/config-local.yml list {{.CLI_ARGS}}
+
+  remove:
+    desc: Delete all records from the database
+    cmds:
+      - go run main.go --config config/config-local.yml remove
+
+  join:
+    desc: Join users, posts and tags tables
+    cmds:
+      - go run main.go --config config/config-local.yml join
+
+  clean:
+    desc: Clean up the build
+    cmds:
+      - rm -rf "{{.OUT_DIR}}"
