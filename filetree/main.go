@@ -30,7 +30,7 @@ func main() {
 			return nil
 		}
 
-		fileTree.AddToTree(strings.Split(path, "/"))
+		fileTree.AddToTree(strings.Split(path, "/"), info.Size())
 
 		return nil
 	})

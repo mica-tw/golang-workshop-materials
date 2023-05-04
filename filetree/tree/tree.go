@@ -8,10 +8,11 @@ import (
 
 type Tree struct {
 	FileName string
+	size     int64
 	children []Tree
 }
 
-func (t *Tree) AddToTree(s []string) {
+func (t *Tree) AddToTree(s []string, size int64) {
 	if len(s) == 0 {
 		return
 	}
@@ -28,21 +29,28 @@ func (t *Tree) AddToTree(s []string) {
 	}
 
 	if i := slices.IndexFunc(t.children, matchesElem); i != -1 {
-		t.children[i].AddToTree(nextIter)
+		t.children[i].AddToTree(nextIter, size)
 		return
 	}
 
 	newChild := Tree{
 		FileName: firstElem,
+		size:     size,
 	}
 
-	newChild.AddToTree(nextIter)
+	newChild.AddToTree(nextIter, size)
 
 	t.children = append(t.children, newChild)
 }
 
 func (t *Tree) recursiveString(prefix string) string {
-	s := fmt.Sprintf("%s\n", t.FileName)
+	s := t.FileName
+
+	if len(t.children) == 0 {
+		s = fmt.Sprintf("%s (%d)", s, t.size)
+	}
+
+	s = fmt.Sprintf("%s\n", s)
 
 	for i, child := range t.children {
 		startingChar := "├"
