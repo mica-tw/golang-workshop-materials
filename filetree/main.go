@@ -26,6 +26,10 @@ func main() {
 		FileName: root,
 	}
 	filepath.Walk(root, func(path string, info fs.FileInfo, err error) error {
+		if root == path {
+			return nil
+		}
+
 		fileTree.AddToTree(strings.Split(path, "/"))
 
 		return nil

@@ -11,16 +11,6 @@ type Tree struct {
 	children []Tree
 }
 
-func (t *Tree) getChildrenNames() []string {
-	var s []string
-
-	for _, child := range t.children {
-		s = append(s, child.FileName)
-	}
-
-	return s
-}
-
 func (t *Tree) AddToTree(s []string) {
 	if len(s) == 0 {
 		return
