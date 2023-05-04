@@ -1,37 +1,74 @@
 package tree
 
-type Tree map[string]Tree
+import (
+	"fmt"
 
-func (t Tree) AddToTree(s []string) {
+	"golang.org/x/exp/slices"
+)
+
+type Tree struct {
+	FileName string
+	children []Tree
+}
+
+func (t *Tree) getChildrenNames() []string {
+	var s []string
+
+	for _, child := range t.children {
+		s = append(s, child.FileName)
+	}
+
+	return s
+}
+
+func (t *Tree) AddToTree(s []string) {
 	if len(s) == 0 {
 		return
 	}
 
-	if t == nil {
-		t = make(Tree)
+	var nextIter []string
+	if len(s) > 1 {
+		nextIter = s[1:]
 	}
 
 	firstElem := s[0]
 
-	if len(s) > 1 {
-		if nextBranch, ok := t[firstElem]; ok {
-			nextBranch.AddToTree(s[1:])
-			return
-		}
+	matchesElem := func(tr Tree) bool {
+		return tr.FileName == firstElem
+	}
 
-		t[firstElem] = createTreeFromPath(s[1:])
+	if i := slices.IndexFunc(t.children, matchesElem); i != -1 {
+		t.children[i].AddToTree(nextIter)
 		return
 	}
 
-	if _, ok := t[firstElem]; !ok {
-		t[firstElem] = nil
+	newChild := Tree{
+		FileName: firstElem,
 	}
+
+	newChild.AddToTree(nextIter)
+
+	t.children = append(t.children, newChild)
 }
 
-func createTreeFromPath(s []string) Tree {
-	if len(s) == 1 {
-		return Tree{s[0]: nil}
+func (t *Tree) recursiveString(prefix string) string {
+	s := fmt.Sprintf("%s\n", t.FileName)
+
+	for i, child := range t.children {
+		startingChar := "├"
+		nextPrefix := fmt.Sprintf("%s%s", prefix, "|  ")
+		if i == len(t.children)-1 {
+			startingChar = "└"
+			nextPrefix = fmt.Sprintf("%s%s", prefix, "   ")
+		}
+
+		s = fmt.Sprintf("%s%s%s-- %s", s, prefix, startingChar,
+			child.recursiveString(nextPrefix))
 	}
 
-	return Tree{s[0]: createTreeFromPath(s[1:])}
+	return s
+}
+
+func (t Tree) String() string {
+	return t.recursiveString("")
 }
