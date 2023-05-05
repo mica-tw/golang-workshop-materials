@@ -1,7 +1,9 @@
 package tree
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 
 	"golang.org/x/exp/slices"
 )
@@ -43,30 +45,50 @@ func (t *Tree) AddToTree(s []string, size int64) {
 	t.children = append(t.children, newChild)
 }
 
-func (t *Tree) recursiveString(prefix string) string {
+func (t *Tree) recursiveString(w io.Writer, prefix string) error {
 	s := t.FileName
 
 	if len(t.children) == 0 {
 		s = fmt.Sprintf("%s (%d)", s, t.size)
 	}
 
-	s = fmt.Sprintf("%s\n", s)
+	_, err := w.Write([]byte(fmt.Sprintf("%s\n", s)))
+	if err != nil {
+		return fmt.Errorf("failed to write tree: %w", err)
+	}
 
 	for i, child := range t.children {
-		startingChar := "├"
+		startingChar := "├-- "
 		nextPrefix := fmt.Sprintf("%s%s", prefix, "|   ")
 		if i == len(t.children)-1 {
-			startingChar = "└"
+			startingChar = "└-- "
 			nextPrefix = fmt.Sprintf("%s%s", prefix, "    ")
 		}
 
-		s = fmt.Sprintf("%s%s%s-- %s", s, prefix, startingChar,
-			child.recursiveString(nextPrefix))
+		w.Write(append([]byte(prefix), []byte(startingChar)...))
+		if err != nil {
+			return fmt.Errorf("failed to write tree: %w", err)
+		}
+
+		err = child.recursiveString(w, nextPrefix)
+		if err != nil {
+			return fmt.Errorf("could not recurse: %w", err)
+		}
 	}
 
-	return s
+	return nil
 }
 
 func (t Tree) String() string {
-	return t.recursiveString("")
+	var bufBytes []byte
+	buf := bytes.NewBuffer(bufBytes)
+
+	t.recursiveString(buf, "")
+
+	res, err := io.ReadAll(buf)
+	if err != nil {
+		panic(err)
+	}
+
+	return string(res)
 }
