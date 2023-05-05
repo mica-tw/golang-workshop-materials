@@ -54,10 +54,10 @@ func (t *Tree) recursiveString(prefix string) string {
 
 	for i, child := range t.children {
 		startingChar := "├"
-		nextPrefix := fmt.Sprintf("%s%s", prefix, "|  ")
+		nextPrefix := fmt.Sprintf("%s%s", prefix, "|   ")
 		if i == len(t.children)-1 {
 			startingChar = "└"
-			nextPrefix = fmt.Sprintf("%s%s", prefix, "   ")
+			nextPrefix = fmt.Sprintf("%s%s", prefix, "    ")
 		}
 
 		s = fmt.Sprintf("%s%s%s-- %s", s, prefix, startingChar,
