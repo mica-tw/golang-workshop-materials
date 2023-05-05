@@ -44,7 +44,7 @@ func TestAddToTree(t *testing.T) {
 	}
 }
 
-func TestRecursiveString(t *testing.T) {
+func TestString(t *testing.T) {
 	t.Run("normal case", func(t *testing.T) {
 		// Create a new tree
 		tr := Tree{
@@ -56,7 +56,7 @@ func TestRecursiveString(t *testing.T) {
 		tr.AddToTree([]string{"dir", "file.txt"}, 400)
 
 		// Generate the string representation of the tree
-		str := tr.recursiveString("")
+		str := tr.String()
 
 		// Verify the string representation of the tree
 		expectedStr := `root
@@ -76,7 +76,7 @@ func TestRecursiveString(t *testing.T) {
 	t.Run("empty tree", func(t *testing.T) {
 		var tr Tree
 
-		if s := tr.recursiveString(""); s == "" {
+		if s := tr.String(); s == "" {
 			t.Errorf("representation of empty tree should be empty string. Got %s", s)
 		}
 	})
