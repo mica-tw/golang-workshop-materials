@@ -1,0 +1,221 @@
+# Concurrency in Go
+
+## Concurrency in Go
+
+> Do not communicate by sharing memory; instead, share memory by communicating.
+- In Go, concurrency is achieved using **goroutines** and **channels**
+
+## Goroutines
+- It is a function executing concurrently with other goroutines in the same address space.
+- It is lightweight, costing little more than the allocation of stack space.
+- The stacks start small, so they are cheap, and grow by allocating (and freeing) heap storage as required.
+- Goroutines are multiplexed onto multiple OS threads so if one should block, such as while waiting for I/O, others continue to run.
+
+
+[Effective Go](https://go.dev/doc/effective_go#concurrency)
+
+## Invocation
+- Prefix a function or method call with the go keyword to run the call in a new goroutine.
+- A function literal can be handy in a goroutine invocation.
+
+## Goroutine Example
+.play -edit examples/ex001/main.go
+
+## Goroutine Example (function literal)
+
+.play examples/ex002/main.go
+
+## Channels
+- Channels are a way to communicate between goroutines.
+- They allow data to be passed from one goroutine to another in a synchronized way.
+- Channels are a typed conduit through which you can send and receive values with the channel operator `<-`
+
+```
+ch <- v    // Send v to channel ch.
+v := <-ch  // Receive from ch, and assign value to v.
+```
+The data flows in the direction of the arrow
+
+## Channels (continued)
+- Like maps, channels are allocated with `make`.
+- The resulting value acts as a reference to an underlying data structure.
+- If an optional integer parameter is provided, it sets the buffer size for the channel.
+- The default is zero, for an unbuffered or synchronous channel.
+
+```
+ci := make(chan int)            // unbuffered channel of integers
+cj := make(chan int, 0)         // unbuffered channel of integers
+cs := make(chan *os.File, 100)  // buffered channel of pointers to Files
+```
+
+## Channels (example)
+
+.play examples/ex003/main.go
+
+## Channel behaviour
+
+* `Receivers` always block until there is data to receive.
+* **Unbuffered channels**: the `sender` blocks until the `receiver` has received the value.
+* **Buffered channels**: `Sends` to a buffered channel block only when the buffer is full. `Receives` block when the buffer is empty.
+
+
+## Range and Close
+
+- A sender can close a channel to indicate that no more values will be sent.
+- Receivers can test whether a channel has been closed by assigning a second parameter to the receive expression:
+
+```
+v, ok := <-ch
+```
+`ok` is false if there are no more values to receive and the channel is closed.
+- The loop `for i := range c` receives values from the channel repeatedly until it is closed
+- Only the sender should close a channel, never the receiver. Sending on a closed channel will cause a panic.
+- Channels aren't like files; you don't usually need to close them. Closing is only necessary when the receiver must be told there are no more values coming, such as to terminate a range loop.
+
+## Range and Close (example)
+
+.play examples/ex004/main.go
+
+## Select
+
+- The `select` statement lets a goroutine wait on multiple communication operations.
+- It's like a switch, but each case is a communication:
+    - All channels are evaluated.
+    - Selection blocks until one communication can proceed, which then does.
+    - If multiple can proceed, select chooses pseudo-randomly.
+    - A default clause, if present, executes immediately if no channel is ready.
+
+```
+select {
+    case v1 := <-c1:
+        fmt.Printf("received %v from c1\n", v1)
+    case v2 := <-c2:
+        fmt.Printf("received %v from c2\n", v1)
+    case c3 <- 23:
+        fmt.Printf("sent %v to c3\n", 23)
+    default:
+        fmt.Printf("no one was ready to communicate\n")
+}
+```
+
+## Select (example)
+
+.play examples/ex005/main.go
+
+## Wait Groups
+- A WaitGroup waits for a collection of goroutines to finish.
+- The main goroutine calls `Add` to set the number of goroutines to wait for.
+- Then each of the goroutines runs and calls `Done` when finished.
+- At the same time, Wait can be used to block until all goroutines have finished.
+
+> A WaitGroup must not be copied after first use.
+
+## Wait Group (example)
+
+.play examples/ex006/main.go
+
+## Pattern: Generator
+- Functions that returns a channel. (Channels are first-class values just like strings or integers)
+- Returns receive-only channel.
+- Used to decouple the generation of values from their consumption.
+
+## Generator (examples)
+
+.play examples/ex007/main.go /^func.idGenerator/,$
+
+
+
+## Pattern: Channel as a handle on a service
+- we can have multiple generators as different services
+
+## Channel as a handle on a service (example)
+.play examples/ex008/main.go /^type.Algorithm/,$
+
+
+## Pattern: FanIn
+- Is a concurrency pattern that combines the output of multiple channels into a single channel.
+- This is useful when you have multiple sources of data that need to be merged and processed together.
+- Not waiting on any service, we can read from whichever service is ready.
+- Execution is not in a sequential order
+
+## FanIn (example)
+
+.play examples/ex009/main.go /^func.seq/,$
+
+## Pattern: Restore sequence
+- The Restoring Sequence pattern is used  ensure that the output from a `fan-in` pattern is processed in a sequential manner,
+  while still allowing for efficient concurrent execution.
+
+**Solution**
+
+- Send a channel on a channel, making goroutine wait its turn.
+- Receive all messages, then enable them again by sending on a private channel.
+
+.code examples/ex010/main.go /START/,/STOP/
+
+## Restore sequence (example)
+
+.play examples/ex010/main.go /^func.service/,$
+
+## Pattern: Timeout using select
+- The time.After function returns a channel that blocks for the specified duration.
+- After the interval, the channel delivers the current time, once.
+
+## Timeout using select (example)
+
+.play examples/ex011/main.go /^func.main/,$
+
+**Timeout for the whole conversation:**
+
+.play examples/ex012/main.go /^func.main/,$
+
+## Quit channel
+- Signal the sending service to stop when we're done with the service
+
+## Quit channel (example)
+
+.play examples/ex013/main.go /^func.generator/,$
+
+## Pattern: Receive on quit channel
+- Wait for the service to signal us it's done: receive on the quit channel
+
+## Receive on quit channel
+
+.play examples/ex014/main.go /^func.generator/,$
+
+## Pattern: Daisy-chain
+
+- It is a way to connect a series of goroutines in a linear fashion.
+- The output of each goroutine becomes the input of the next goroutine in the chain.
+- Useful when we have a series of related operations that need to be performed in a specific order,
+  and we want to distribute the workload across multiple goroutines.
+
+## Daisy-chain example
+
+.play examples/ex015/main.go /^func.upper/,$
+
+## Signal channel 🏁
+
+```
+ch := make(chan struct{})
+```
+- This is a channel with an empty struct type.
+- Used to signal the occurrence of an event or to synchronize the execution of multiple goroutines.
+- The empty struct type `struct{}` has zero size, that means it doesn't consume any memory.
+
+## Signal channel (example)
+
+.play examples/ex016/main.go /^func.worker1/,$
+
+## Semaphore
+- A semaphore allows you to limit the number of goroutines that can access a shared resource simultaneously.
+- The number of active goroutines can be restricted by using a `semaphore` implemented using a` buffered channel`.
+
+## Semaphore (example)
+
+.play examples/ex017/main.go /^type.Semaphore/,$
+
+## References
+
+* [Go Concurrency Patterns - Rob Pike](https://www.youtube.com/watch?v=f6kdp27TYZs)
+* [Advanced Go Concurrency Patterns - Sameer Ajmani](https://www.youtube.com/watch?v=QDDwwePbDtw)
