@@ -163,7 +163,7 @@ func main() {
 
 	// Create a store for some `product`
 	// prdStore := mem_store.NewMemStore[string, products.Product]()
-	// prd, _ := prdStore.Store("ad-id", products.Product{
+	// prd, _ := prdStore.Store("prd-id", products.Product{
 	// 	ID:          "prd-id",
 	// 	Title:       "my product title",
 	// 	Price:       32,
