@@ -1,0 +1,136 @@
+# Web Programming with Go Standard Library
+
+## net/http package
+- Built-in package in Go
+- Provides functionality for building HTTP servers and clients.
+
+## Basic Client (GET)
+.play examples/client/basic-get/main.go
+
+## Basic Client (POST)
+.play examples/client/basic-post/main.go
+
+## Custom Client
+.play examples/client/custom/main.go
+
+## Basic Server
+.play examples/server/basic/main.go
+
+## Handlers
+```go
+type Handler interface {
+	ServeHTTP(ResponseWriter, *Request)
+}
+```
+- A Handler responds to an HTTP request.
+- `ServeHTTP` should write reply headers and data to the `ResponseWriter` and then return.
+- `func ListenAndServe(addr string, handler Handler) error`, takes a handler as an argument.
+
+## Handler (example 1)
+.play examples/server/handler/main.go
+
+## Handler (example 2)
+.play examples/server/handler_1/main.go
+
+## Handler (example 3)
+.play examples/server/handler_2/main.go
+
+
+## HandlerFunc
+```go
+type HandlerFunc func(ResponseWriter, *Request)
+```
+- The `HandlerFunc` type is an adapter to allow the use of ordinary functions as HTTP handlers.
+- If f is a function with the appropriate signature, HandlerFunc(f) is a Handler that calls f.
+
+## HandlerFunc (example)
+.play examples/server/handler_func/main.go
+
+## ServeMux
+```
+type ServeMux struct {
+	// contains filtered or unexported fields
+}
+```
+- ServeMux is an HTTP request multiplexer.
+- It matches the URL of each incoming request against a list of registered patterns and calls the handler for the pattern that most closely matches the URL.
+
+## ServeMux (methods)
+```
+func NewServeMux() *ServeMux // Creates a new ServeMux.
+
+func (mux *ServeMux) Handle(pattern string, handler Handler) {
+    // Registers the handler.
+}
+
+func (mux *ServeMux) HandleFunc(pattern string, handler func(ResponseWriter, *Request)) {
+    // Registers the handler function.
+}
+
+func (mux *ServeMux) ServeHTTP(w ResponseWriter, r *Request) {
+    // Dispatches the request to the handler whose pattern most closely matches the request URL.
+}
+```
+
+## ServeMux [example 1: using Handle method]
+.play examples/server/mux/main.go
+
+## ServeMux [example 1: using HandleFunc method]
+.play examples/server/mux_1/main.go
+
+## DefaultServeMux
+- DefaultServeMux is a global variable of type *http.ServeMux
+- Serves as the default HTTP request multiplexer.
+- It is initialized by the http package to a new http.ServeMux when the package is imported.
+- It is used by the http.ListenAndServe function and the http.Server type when a custom ServeMux is not specified.
+
+## DefaultServeMux (Usage)
+```
+func Handle(pattern string, handler Handler)
+```
+Handle registers the handler for the given pattern in the DefaultServeMux.
+```
+func HandleFunc(pattern string, handler func(ResponseWriter, *Request))
+```
+HandleFunc registers the handler function for the given pattern in the DefaultServeMux.
+
+## DefaultServeMux (Example 1: using http.HandleFunc)
+.play examples/server/default_mux/main.go
+
+## DefaultServeMux (Example 2: using http.Handle)
+.play examples/server/default_mux_1/main.go
+
+## DefaultServeMux (Example 3: Hit Counter)
+.play examples/server/default_mux_2/main.go
+
+## Middleware
+- Middlewares are functions that intercept and modify HTTP requests and/or responses before they are handled by the main request handler function.
+- Used to add common functionality to an application's HTTP handling, such as logging, authentication, authorization, rate limiting, error handling, etc.
+
+## Middleware (example)
+
+.play examples/server/middleware/main.go
+
+## http.Server
+- A Server defines parameters for running an HTTP server.
+- More control over the server's behavior is available by creating a custom Server:
+
+## http.Server (example)
+.play examples/server/server/main.go
+
+## Testing with httptest package
+- httptest.ResponseRecorder
+- httptest.Server
+
+## ResponseRecorder
+ResponseRecorder is an implementation of http.ResponseWriter that records its mutations for later inspection in tests.
+
+## httptest.ResponseRecorder (example)
+.play examples/testing/recorder/main.go
+
+## httptest.Server
+- is an HTTP server listening on a system-chosen port on the local loop-back interface,
+- Use in end-to-end HTTP tests.
+
+## httptest.Server (example)
+.play examples/testing/testserver/main.go
