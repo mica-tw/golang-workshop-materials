@@ -12,7 +12,7 @@ func Test_prdStore_find(t *testing.T) {
 	}
 
 	time := time.Now()
-	prd1 := &product{
+	prd1 := product{
 		ID:        "1",
 		CreatedAt: time,
 		ProductRequest: ProductRequest{
@@ -21,7 +21,7 @@ func Test_prdStore_find(t *testing.T) {
 			Price:       1,
 		},
 	}
-	prd2 := &product{
+	prd2 := product{
 		ID:        "2",
 		CreatedAt: time,
 		ProductRequest: ProductRequest{
@@ -31,7 +31,7 @@ func Test_prdStore_find(t *testing.T) {
 		},
 	}
 	store := &MemProductStore{
-		store: map[string]ProductIface{"1": prd1, "2": prd2},
+		store: map[string]product{"1": prd1, "2": prd2},
 	}
 
 	tests := []struct {
@@ -84,7 +84,7 @@ func Test_prdStore_store(t *testing.T) {
 		{
 			name: "simple store",
 			p: &MemProductStore{
-				store:    map[string]ProductIface{},
+				store:    map[string]product{},
 				createId: func() string { return id },
 				now:      func() time.Time { return now },
 			},
@@ -101,7 +101,7 @@ func Test_prdStore_store(t *testing.T) {
 		{
 			name: "validation error on store",
 			p: &MemProductStore{
-				store:    map[string]ProductIface{},
+				store:    map[string]product{},
 				createId: func() string { return id },
 				now:      func() time.Time { return now },
 			},

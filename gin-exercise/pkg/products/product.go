@@ -30,7 +30,7 @@ func (p *product) GetId() string {
 	return p.ID
 }
 
-func newProduct(req ProductRequest, createID func() string, nowFunc func() time.Time) (ProductIface, error) {
+func newProduct(req ProductRequest, createID func() string, nowFunc func() time.Time) (*product, error) {
 	prd := product{
 		ID:             createID(),
 		CreatedAt:      nowFunc(),
