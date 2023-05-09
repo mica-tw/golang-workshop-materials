@@ -1,0 +1,14 @@
+version: '3'
+
+tasks:
+  build:
+    cmds:
+      - go build
+
+  run:
+    cmds:
+      - go run main.go {{.CLI_ARGS}}
+
+  clean:
+    cmds:
+      - go clean
