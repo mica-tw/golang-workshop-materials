@@ -1,0 +1,30 @@
+- name: Apple iPhone XR
+  description: The Apple iPhone XR is a great choice for anyone looking for a powerful and reliable smartphone.
+  price: 749.99
+- name: Samsung Galaxy S21 Ultra
+  description: The Samsung Galaxy S21 Ultra is a high-end Android smartphone with a large display and advanced features.
+  price: 1199.99
+- name: Sony PlayStation 5
+  description: The Sony PlayStation 5 is a next-generation gaming console with powerful hardware and advanced features.
+  price: 499.99
+- name: Microsoft Surface Laptop 4
+  description: The Microsoft Surface Laptop 4 is a sleek and powerful laptop with a premium design and excellent performance.
+  price: 1299.99
+- name: Bose QuietComfort 35 II
+  description: The Bose QuietComfort 35 II is a popular noise-cancelling headphone with excellent sound quality and comfort.
+  price: 299.99
+- name: Apple AirPods Pro
+  description: The Apple AirPods Pro are high-end wireless earbuds with active noise cancellation and excellent sound quality.
+  price: 249.99
+- name: Samsung 65-inch QLED TV
+  description: The Samsung 65-inch QLED TV is a high-end television with a stunning picture quality and advanced features.
+  price: 1499.99
+- name: Dyson V11 Absolute
+  description: The Dyson V11 Absolute is a powerful and versatile cordless vacuum cleaner with advanced features and excellent performance.
+  price: 599.99
+- name: Garmin Fenix 6 Pro
+  description: The Garmin Fenix 6 Pro is a high-end GPS smartwatch with advanced features for fitness tracking and outdoor activities.
+  price: 649.99
+- name: DJI Mavic Air 2
+  description: The DJI Mavic Air 2 is a high-end drone with advanced features for aerial photography and videography.
+  price: 799.99
